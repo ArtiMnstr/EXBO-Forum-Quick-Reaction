@@ -1,0 +1,56 @@
+{
+  "manifest_version": 3,
+  "name": "EXBO Forum Quick Reaction",
+  "version": "1.0.0",
+  "description": "Быстрая установка выбранной реакции на посты форума EXBO по кнопке или двойному щелчку.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://forum.exbo.net/*"
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "EXBO Forum Quick Reaction",
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://forum.exbo.net/*"
+      ],
+      "js": [
+        "src/page-bridge.js"
+      ],
+      "world": "MAIN",
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://forum.exbo.net/*"
+      ],
+      "js": [
+        "src/reactions-catalog.js",
+        "src/core.js",
+        "src/content.js"
+      ],
+      "css": [
+        "src/styles.css"
+      ],
+      "world": "ISOLATED",
+      "run_at": "document_idle"
+    }
+  ]
+}
