@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EXBO Forum Quick Reaction</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <header class="header">
+        <div class="header__brand">
+          <img class="header__logo" src="../icons/icon48.png" alt="E" width="26" height="26" />
+          <div class="header__title-wrap">
+            <h1 class="header__title">EXBO Quick Reaction</h1>
+            <p class="header__sub">Только для forum.exbo.net</p>
+          </div>
+        </div>
+        <button id="powerToggleBtn" type="button" class="power-btn is-on" aria-pressed="true">
+          Вкл
+        </button>
+      </header>
+
+      <div id="disabledNotice" class="disabled-banner is-hidden">
+        Расширение отключено. Кнопки, двойной клик и хоткей на форуме приостановлены.
+      </div>
+
+      <section id="counterCard" class="card counter-card" aria-live="polite">
+        <div class="counter-card__metrics">
+          <div class="counter-card__info">
+            <span class="counter-card__label">Всего</span>
+            <strong id="counterValue" class="counter-card__value">0</strong>
+          </div>
+          <div class="counter-card__divider" aria-hidden="true"></div>
+          <div class="counter-card__info">
+            <span class="counter-card__label">За сегодня</span>
+            <strong id="dailyCounterValue" class="counter-card__value counter-card__value--today">0</strong>
+          </div>
+        </div>
+        <div class="counter-card__right">
+          <div id="selectedPreview" class="selected-pill" title="Выбранная реакция"></div>
+          <button id="resetCounterBtn" type="button" class="btn-secondary">Сброс</button>
+        </div>
+      </section>
+
+      <section id="topReactionsCard" class="card">
+        <div class="section-head">
+          <h2 class="section-title">Топ реакций</h2>
+          <span class="section-meta">За всё время</span>
+        </div>
+        <div id="topReactionsList" class="top-list"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2 class="section-title">Способ активации</h2>
+        </div>
+        <div class="mode-group" role="radiogroup" aria-label="Способ активации">
+          <label class="mode-option">
+            <input type="radio" name="activationMode" value="button" />
+            <span>Кнопка</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="activationMode" value="dblclick" />
+            <span>Двойной клик</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="activationMode" value="both" />
+            <span>Оба способа</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2 class="section-title">Хоткей (на наведённый пост)</h2>
+          <span id="hotkeyValueBadge" class="section-meta">Не назначен</span>
+        </div>
+        <div class="hotkey-row">
+          <button id="hotkeyRecordBtn" type="button" class="btn-secondary hotkey-btn">
+            Назначить клавишу
+          </button>
+          <button id="hotkeyClearBtn" type="button" class="btn-secondary">Очистить</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <label class="toggle-row" for="showQuickReplyInput">
+          <span class="toggle-row__text">Кнопка быстрого ответа</span>
+          <input id="showQuickReplyInput" type="checkbox" />
+        </label>
+        <input
+          id="quickReplyTextInput"
+          class="search-input reply-input"
+          type="text"
+          placeholder='@"kravv285"#1459207 дроноеб'
+          aria-label="Текст быстрого ответа"
+        />
+        <div class="reply-actions">
+          <button id="resetQuickReplyBtn" type="button" class="btn-secondary btn-compact">
+            Вернуть исходный текст
+          </button>
+        </div>
+      </section>
+
+      <section class="card">
+        <label class="toggle-row" for="showCounterInput">
+          <span class="toggle-row__text">Показывать счётчик реакций</span>
+          <input id="showCounterInput" type="checkbox" />
+        </label>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2 class="section-title">Реакции и избранное (★)</h2>
+          <span id="reactionCountBadge" class="section-meta"></span>
+        </div>
+        <label class="sr-only" for="reactionSearch">Поиск реакции</label>
+        <input
+          id="reactionSearch"
+          class="search-input"
+          type="search"
+          placeholder="Поиск по названию (например: snowman, fire)..."
+          autocomplete="off"
+        />
+        <div id="reactionGrid" class="reaction-grid" role="listbox" aria-label="Список реакций"></div>
+      </section>
+
+      <footer class="footer">
+        <span id="saveStatus" class="footer__status" aria-live="polite">Настройки сохраняются автоматически</span>
+      </footer>
+    </main>
+
+    <script src="reactions-catalog.js"></script>
+    <script src="core.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

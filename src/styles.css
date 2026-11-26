@@ -1,0 +1,207 @@
+.Post-actions .item-exbo-qr,
+.Post-actions .item-exbo-qr-reply {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  position: relative;
+  gap: 4px;
+}
+
+.exbo-qr-group {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.Post-actions .exbo-qr-btn,
+.Post-actions .exbo-qr-fav-toggle,
+.Post-actions .exbo-qr-reply-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.2;
+  color: var(--muted-color, #94a3b8);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.Post-actions .exbo-qr-fav-toggle {
+  padding: 4px 5px;
+  font-size: 11px;
+  line-height: 1;
+  margin-left: 1px;
+}
+
+.Post-actions .exbo-qr-btn:hover:not(:disabled),
+.Post-actions .exbo-qr-fav-toggle:hover:not(:disabled),
+.Post-actions .exbo-qr-reply-btn:hover:not(:disabled) {
+  background: var(--control-bg, rgba(102, 111, 153, 0.16));
+  color: var(--primary-color, #40c6ff);
+}
+
+.Post-actions .exbo-qr-btn.is-active {
+  background: rgba(64, 198, 255, 0.14);
+  border-color: rgba(64, 198, 255, 0.4);
+  color: var(--primary-color, #40c6ff);
+  font-weight: 600;
+}
+
+.Post-actions .exbo-qr-btn:disabled,
+.Post-actions .exbo-qr-btn.is-loading {
+  opacity: 0.78;
+  cursor: wait;
+}
+
+.exbo-qr-btn__icon,
+.exbo-qr-reply-btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.exbo-qr-btn__emoji {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: block;
+}
+
+.exbo-qr-btn__glyph,
+.exbo-qr-reply-btn__icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.exbo-qr-btn__label,
+.exbo-qr-reply-btn__label {
+  white-space: nowrap;
+}
+
+.exbo-qr-status {
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 2px 6px;
+  border-radius: 5px;
+  margin-left: 2px;
+}
+
+.exbo-qr-status--loading {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.exbo-qr-status--success {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.14);
+}
+
+.exbo-qr-status--info {
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.exbo-qr-status--error {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.14);
+}
+
+.exbo-qr-fav-menu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 6px);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 10px;
+  background: var(--body-bg, #161822);
+  border: 1px solid var(--border-color, #2d3348);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+
+.exbo-qr-fav-menu.is-hidden {
+  display: none;
+}
+
+.exbo-qr-fav-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.exbo-qr-fav-option:hover {
+  background: var(--control-bg, #262b3d);
+}
+
+.exbo-qr-fav-option.is-active {
+  background: rgba(64, 198, 255, 0.16);
+  border-color: rgba(64, 198, 255, 0.5);
+}
+
+.exbo-qr-fav-option img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+.exbo-qr-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: exbo-qr-spin 0.7s linear infinite;
+}
+
+@keyframes exbo-qr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.exbo-qr-toast {
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  display: inline-block;
+  max-width: 100%;
+  background: var(--control-bg, #262b3d);
+  color: var(--control-color, #cbd5e1);
+  border: 1px solid rgba(102, 111, 153, 0.28);
+}
+
+.exbo-qr-toast--error {
+  background: rgba(239, 68, 68, 0.14);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.exbo-qr-toast--info {
+  background: rgba(64, 198, 255, 0.12);
+  color: var(--primary-color, #40c6ff);
+  border-color: rgba(64, 198, 255, 0.35);
+}
