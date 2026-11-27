@@ -38,6 +38,16 @@
     }
   }
 
+  function syncHoverHighlightRootClass() {
+    var active = Boolean(settings.enabled && settings.highlightHoveredPost);
+    if (document.documentElement) {
+      document.documentElement.classList.toggle('exbo-qr-hover-enabled', active);
+    }
+    if (!active) {
+      clearHoveredPostHighlight();
+    }
+  }
+
   function updateHoveredPostHighlight(itemEl) {
     if (!settings.enabled || !settings.highlightHoveredPost) {
       clearHoveredPostHighlight();
@@ -52,6 +62,24 @@
       highlightedItemEl = itemEl;
     }
   }
+
+  function resolveHoveredPostItem(target) {
+    var el = target && target.nodeType === 3 ? target.parentElement : target;
+    if (!el || typeof el.closest !== 'function') {
+      return null;
+    }
+    var itemEl = el.closest('.PostStream-item[data-id][data-type="comment"]');
+    if (itemEl && !itemEl.querySelector('.ReplyPlaceholder')) {
+      return itemEl;
+    }
+    var fallbackItem = el.closest('.PostStream-item');
+    if (fallbackItem && fallbackItem.querySelector('.CommentPost') && !fallbackItem.querySelector('.ReplyPlaceholder')) {
+      return fallbackItem;
+    }
+    return null;
+  }
+
+  syncHoverHighlightRootClass();
 
   function seedCatalogMap(list) {
     var next = new Map();
@@ -899,20 +927,20 @@
   }
 
   document.addEventListener('pointerover', function (event) {
-    var target = event.target;
-    if (!target || typeof target.closest !== 'function') {
-      return;
-    }
-    var itemEl = target.closest('.PostStream-item[data-id][data-type="comment"]');
+    var itemEl = resolveHoveredPostItem(event.target);
     if (itemEl) {
       lastHoveredItemEl = itemEl;
       updateHoveredPostHighlight(itemEl);
-    } else if (!target.closest('.PostStream-item')) {
+    } else if (event.target && typeof event.target.closest === 'function' && !event.target.closest('.PostStream-item')) {
       clearHoveredPostHighlight();
     }
   }, true);
 
   document.addEventListener('pointerleave', function () {
+    clearHoveredPostHighlight();
+  });
+
+  window.addEventListener('blur', function () {
     clearHoveredPostHighlight();
   });
 
@@ -1094,6 +1122,7 @@
     }
     if (changes[SETTINGS_KEY]) {
       settings = core.normalizeSettings(changes[SETTINGS_KEY].newValue);
+      syncHoverHighlightRootClass();
       if (!settings.enabled) {
         openFavPostId = null;
         clearHoveredPostHighlight();
@@ -1119,6 +1148,7 @@
 
   chrome.storage.local.get(SETTINGS_KEY).then(function (data) {
     settings = core.normalizeSettings(data && data[SETTINGS_KEY]);
+    syncHoverHighlightRootClass();
     startObserver();
     if (settings.enabled) {
       scheduleSync();
