@@ -16,9 +16,14 @@
             <p class="header__sub">Только для forum.exbo.net</p>
           </div>
         </div>
-        <button id="powerToggleBtn" type="button" class="power-btn is-on" aria-pressed="true">
-          Вкл
-        </button>
+        <div class="header__actions">
+          <button id="openWhatsNewBtn" type="button" class="version-pill" title="Что нового в обновлении">
+            v1.1.0
+          </button>
+          <button id="powerToggleBtn" type="button" class="power-btn is-on" aria-pressed="true">
+            Вкл
+          </button>
+        </div>
       </header>
 
       <div id="disabledNotice" class="disabled-banner is-hidden">
@@ -72,6 +77,12 @@
       </section>
 
       <section class="card">
+        <button id="showChancesBtn" type="button" class="btn-secondary btn-full">
+          Показать шансы
+        </button>
+      </section>
+
+      <section class="card">
         <div class="section-head">
           <h2 class="section-title">Хоткей (на наведённый пост)</h2>
           <span id="hotkeyValueBadge" class="section-meta">Не назначен</span>
@@ -107,6 +118,13 @@
         <label class="toggle-row" for="showCounterInput">
           <span class="toggle-row__text">Показывать счётчик реакций</span>
           <input id="showCounterInput" type="checkbox" />
+        </label>
+      </section>
+
+      <section class="card">
+        <label class="toggle-row" for="highlightHoveredInput">
+          <span class="toggle-row__text">Подсвечивать сообщение под курсором</span>
+          <input id="highlightHoveredInput" type="checkbox" />
         </label>
       </section>
 

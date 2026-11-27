@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Обновление EXBO Quick Reaction</title>
+    <link rel="stylesheet" href="whats-new.css" />
+  </head>
+  <body>
+    <main class="wn-stage">
+      <article class="wn-card">
+        <header class="wn-header">
+          <div class="wn-brand">
+            <img class="wn-logo" src="../icons/icon48.png" alt="E" width="34" height="34" />
+            <div>
+              <div class="wn-kicker">EXBO Forum Quick Reaction</div>
+              <h1 id="wnHeading" class="wn-title">Что нового в обновлении</h1>
+            </div>
+          </div>
+          <span id="wnVersionBadge" class="wn-version">v1.1.0</span>
+        </header>
+
+        <section class="wn-section">
+          <h2 class="wn-section-title">Основные изменения и возможности</h2>
+          <ul id="wnHighlights" class="wn-list"></ul>
+        </section>
+
+        <section class="wn-section wn-section--mystery">
+          <h2 class="wn-section-title">Скрытые условия</h2>
+          <p class="wn-mystery-lead">
+            Некоторые события срабатывают при выполнении определённых условий:
+          </p>
+          <ul id="wnMysteries" class="wn-list wn-list--mystery"></ul>
+        </section>
+
+        <section class="wn-section wn-section--stats">
+          <p id="wnStatsNote" class="wn-stats-note"></p>
+        </section>
+
+        <footer class="wn-footer">
+          <button id="wnCloseBtn" type="button" class="wn-close-btn">Понятно, перейти к форуму</button>
+        </footer>
+      </article>
+    </main>
+
+    <script src="core.js"></script>
+    <script src="whats-new.js"></script>
+  </body>
+</html>

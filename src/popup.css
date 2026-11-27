@@ -61,6 +61,31 @@ body {
   color: #94a3b8;
 }
 
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.version-pill {
+  padding: 5px 8px;
+  border-radius: 7px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #94a3b8;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.version-pill:hover {
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
 .power-btn {
   padding: 6px 12px;
   border-radius: 8px;
@@ -199,6 +224,11 @@ body {
 .btn-compact {
   padding: 4px 8px;
   font-size: 11px;
+}
+
+.btn-full {
+  width: 100%;
+  font-weight: 600;
 }
 
 .btn-secondary.is-confirming {

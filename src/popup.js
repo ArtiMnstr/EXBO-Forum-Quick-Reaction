@@ -19,6 +19,7 @@
   var resetCounterBtn = document.getElementById('resetCounterBtn');
   var topReactionsListEl = document.getElementById('topReactionsList');
   var showCounterInput = document.getElementById('showCounterInput');
+  var highlightHoveredInput = document.getElementById('highlightHoveredInput');
   var hotkeyValueBadgeEl = document.getElementById('hotkeyValueBadge');
   var hotkeyRecordBtn = document.getElementById('hotkeyRecordBtn');
   var hotkeyClearBtn = document.getElementById('hotkeyClearBtn');
@@ -28,6 +29,8 @@
   var reactionSearchEl = document.getElementById('reactionSearch');
   var reactionGridEl = document.getElementById('reactionGrid');
   var reactionCountBadgeEl = document.getElementById('reactionCountBadge');
+  var showChancesBtn = document.getElementById('showChancesBtn');
+  var openWhatsNewBtn = document.getElementById('openWhatsNewBtn');
   var saveStatusEl = document.getElementById('saveStatus');
   var modeInputs = Array.from(document.querySelectorAll('input[name="activationMode"]'));
 
@@ -144,6 +147,9 @@
       }
     });
     showCounterInput.checked = settings.showCounter;
+    if (highlightHoveredInput) {
+      highlightHoveredInput.checked = settings.highlightHoveredPost !== false;
+    }
     showQuickReplyInput.checked = settings.showQuickReplyButton;
     if (document.activeElement !== quickReplyTextInput) {
       quickReplyTextInput.value = settings.quickReplyText;
@@ -288,6 +294,12 @@
     saveSettings({ showCounter: showCounterInput.checked });
   });
 
+  if (highlightHoveredInput) {
+    highlightHoveredInput.addEventListener('change', function () {
+      saveSettings({ highlightHoveredPost: highlightHoveredInput.checked });
+    });
+  }
+
   showQuickReplyInput.addEventListener('change', function () {
     saveSettings({ showQuickReplyButton: showQuickReplyInput.checked });
   });
@@ -340,6 +352,32 @@
   });
 
   reactionSearchEl.addEventListener('input', renderReactionGrid);
+
+  if (showChancesBtn) {
+    showChancesBtn.addEventListener('click', function () {
+      var url = chrome.runtime && typeof chrome.runtime.getURL === 'function'
+        ? chrome.runtime.getURL('src/chances.html')
+        : 'chances.html';
+      if (chrome.tabs && typeof chrome.tabs.create === 'function') {
+        chrome.tabs.create({ url: url });
+      } else {
+        window.open(url, '_blank');
+      }
+    });
+  }
+
+  if (openWhatsNewBtn) {
+    openWhatsNewBtn.addEventListener('click', function () {
+      var url = chrome.runtime && typeof chrome.runtime.getURL === 'function'
+        ? chrome.runtime.getURL('src/whats-new.html')
+        : 'whats-new.html';
+      if (chrome.tabs && typeof chrome.tabs.create === 'function') {
+        chrome.tabs.create({ url: url });
+      } else {
+        window.open(url, '_blank');
+      }
+    });
+  }
 
   resetCounterBtn.addEventListener('click', async function () {
     if (!confirmingReset) {
@@ -407,9 +445,11 @@
   async function init() {
     var data = await chrome.storage.local.get([SETTINGS_KEY, COUNTER_KEY, DAILY_KEY, STATS_KEY, CATALOG_KEY]);
     settings = core.normalizeSettings(data && data[SETTINGS_KEY]);
-    counter = typeof data[COUNTER_KEY] === 'number' && Number.isFinite(data[COUNTER_KEY]) ? data[COUNTER_KEY] : 0;
+    counter = typeof data[COUNTER_KEY] === 'number' && Number.isFinite(data[COUNTER_KEY]) && data[COUNTER_KEY] >= 0
+      ? Math.floor(data[COUNTER_KEY])
+      : 0;
     dailyCounter = core.normalizeDailyCounter(data && data[DAILY_KEY]);
-    reactionStats = data[STATS_KEY] && typeof data[STATS_KEY] === 'object' ? data[STATS_KEY] : {};
+    reactionStats = core.sanitizeReactionStats(data && data[STATS_KEY]);
     if (Array.isArray(data[CATALOG_KEY]) && data[CATALOG_KEY].length > 0) {
       reactions = data[CATALOG_KEY];
     }

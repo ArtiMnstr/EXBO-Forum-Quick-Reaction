@@ -13,6 +13,7 @@
   var ROUTE_EVENT = 'exbo-qr:route-change';
   var SETTINGS_KEY = 'exboQrSettings';
   var CATALOG_KEY = 'exboQrCatalog';
+  var SNOWMAN_MISSES_KEY = 'exboQrSnowmanMisses';
 
   var settings = core.normalizeSettings(null);
   var reactionMap = new Map();
@@ -28,6 +29,29 @@
   var catalogSynced = false;
   var appReadyOnce = false;
   var lastHoveredItemEl = null;
+  var highlightedItemEl = null;
+
+  function clearHoveredPostHighlight() {
+    if (highlightedItemEl) {
+      highlightedItemEl.classList.remove('exbo-qr-hovered-post');
+      highlightedItemEl = null;
+    }
+  }
+
+  function updateHoveredPostHighlight(itemEl) {
+    if (!settings.enabled || !settings.highlightHoveredPost) {
+      clearHoveredPostHighlight();
+      return;
+    }
+    if (highlightedItemEl === itemEl) {
+      return;
+    }
+    clearHoveredPostHighlight();
+    if (itemEl && document.contains(itemEl)) {
+      itemEl.classList.add('exbo-qr-hovered-post');
+      highlightedItemEl = itemEl;
+    }
+  }
 
   function seedCatalogMap(list) {
     var next = new Map();
@@ -535,6 +559,260 @@
     }
   }
 
+  var activeFireworksCleanup = null;
+
+  function launchSnowmanFireworks() {
+    if (typeof activeFireworksCleanup === 'function') {
+      activeFireworksCleanup();
+    }
+
+    var canvas = document.createElement('canvas');
+    canvas.className = 'exbo-qr-fireworks-canvas';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+
+    var banner = document.createElement('div');
+    banner.className = 'exbo-qr-festive-banner';
+    banner.setAttribute('role', 'status');
+    banner.textContent = '⛄ Событие сработало! С наступающим! 🎄';
+    document.body.appendChild(banner);
+    requestAnimationFrame(function () {
+      banner.classList.add('is-visible');
+    });
+
+    var ctx = canvas.getContext('2d');
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    if (ctx) {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    // Festive non-purple winter & New Year palette (gold, ice cyan, crimson, emerald, snow, warm orange, coral)
+    var colors = ['#fbbf24', '#38bdf8', '#ef4444', '#34d399', '#f8fafc', '#fb923c', '#fb7185'];
+    var particles = [];
+    var rockets = [];
+    var snowflakes = [];
+
+    for (var s = 0; s < 68; s++) {
+      snowflakes.push({
+        x: Math.random() * width,
+        y: Math.random() * height * 0.7 - 40,
+        vx: (Math.random() - 0.5) * 1.1,
+        vy: 1.1 + Math.random() * 2.0,
+        size: 2.0 + Math.random() * 2.8,
+        alpha: 0.4 + Math.random() * 0.48
+      });
+    }
+
+    function spawnRocket(waveIdx, indexInWave) {
+      var spreadRatio = 0.06 + Math.random() * 0.88;
+      rockets.push({
+        x: width * spreadRatio,
+        y: height + 16,
+        vx: (Math.random() - 0.5) * 4.2,
+        vy: -(10.5 + Math.random() * 5.8),
+        targetY: height * (0.09 + Math.random() * 0.42),
+        color: colors[(waveIdx * 5 + indexInWave) % colors.length],
+        delayFrames: waveIdx * 52 + indexInWave * 7
+      });
+    }
+
+    // 18 rockets across 3 grand volleys covering the full viewport width
+    for (var w = 0; w < 3; w++) {
+      for (var r = 0; r < 6; r++) {
+        spawnRocket(w, r);
+      }
+    }
+
+    function explode(x, y, baseColor) {
+      var outerCount = 52;
+      var innerCount = 20;
+      var maxSpeedScale = Math.min(1.45, Math.max(0.95, Math.min(width, height) / 760));
+
+      for (var i = 0; i < outerCount; i++) {
+        var angle = (Math.PI * 2 * i) / outerCount + (Math.random() - 0.5) * 0.14;
+        var speed = (3.4 + Math.random() * 6.8) * maxSpeedScale;
+        particles.push({
+          x: x,
+          y: y,
+          prevX: x,
+          prevY: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          color: i % 5 === 0 ? '#f8fafc' : baseColor,
+          alpha: 1,
+          decay: 0.009 + Math.random() * 0.009,
+          radius: 2.8 + Math.random() * 2.8
+        });
+      }
+
+      for (var j = 0; j < innerCount; j++) {
+        var innerAngle = (Math.PI * 2 * j) / innerCount + (Math.random() - 0.5) * 0.2;
+        var innerSpeed = (1.4 + Math.random() * 3.2) * maxSpeedScale;
+        particles.push({
+          x: x,
+          y: y,
+          prevX: x,
+          prevY: y,
+          vx: Math.cos(innerAngle) * innerSpeed,
+          vy: Math.sin(innerAngle) * innerSpeed,
+          color: j % 2 === 0 ? '#fef08a' : '#f8fafc',
+          alpha: 1,
+          decay: 0.011 + Math.random() * 0.01,
+          radius: 2.2 + Math.random() * 2.1
+        });
+      }
+    }
+
+    var rafId = 0;
+    var stopped = false;
+    var startTs = performance.now();
+    var durationMs = 5400;
+
+    function tick(now) {
+      if (stopped || !ctx) {
+        return;
+      }
+      var elapsed = now - startTs;
+      ctx.clearRect(0, 0, width, height);
+
+      // Lightweight drifting snow
+      ctx.fillStyle = '#e0f2fe';
+      for (var i = 0; i < snowflakes.length; i++) {
+        var sf = snowflakes[i];
+        sf.x += sf.vx + Math.sin(elapsed * 0.002 + i) * 0.4;
+        sf.y += sf.vy;
+        if (sf.y > height + 10) {
+          sf.y = -10;
+          sf.x = Math.random() * width;
+        }
+        ctx.globalAlpha = sf.alpha;
+        ctx.beginPath();
+        ctx.arc(sf.x, sf.y, sf.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Rockets rising across waves
+      for (var j = rockets.length - 1; j >= 0; j--) {
+        var rk = rockets[j];
+        if (rk.delayFrames > 0) {
+          rk.delayFrames -= 1;
+          continue;
+        }
+        var oldX = rk.x;
+        var oldY = rk.y;
+        rk.x += rk.vx;
+        rk.y += rk.vy;
+        rk.vy += 0.145;
+
+        ctx.globalAlpha = 0.7;
+        ctx.strokeStyle = rk.color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(oldX, oldY);
+        ctx.lineTo(rk.x, rk.y);
+        ctx.stroke();
+
+        ctx.globalAlpha = 0.98;
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.arc(rk.x, rk.y, 3.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (rk.y <= rk.targetY || rk.vy >= -0.7) {
+          explode(rk.x, rk.y, rk.color);
+          rockets[j] = rockets[rockets.length - 1];
+          rockets.pop();
+        }
+      }
+
+      // Sparks with fast swap-and-pop removal & lightweight trail streaks (zero shadowBlur)
+      for (var p = particles.length - 1; p >= 0; p--) {
+        var pt = particles[p];
+        pt.prevX = pt.x;
+        pt.prevY = pt.y;
+        pt.vx *= 0.976;
+        pt.vy = pt.vy * 0.976 + 0.068;
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        pt.alpha -= pt.decay;
+        if (pt.alpha <= 0.025) {
+          particles[p] = particles[particles.length - 1];
+          particles.pop();
+          continue;
+        }
+
+        ctx.globalAlpha = pt.alpha * 0.45;
+        ctx.strokeStyle = pt.color;
+        ctx.lineWidth = pt.radius * 0.9;
+        ctx.beginPath();
+        ctx.moveTo(pt.prevX, pt.prevY);
+        ctx.lineTo(pt.x, pt.y);
+        ctx.stroke();
+
+        ctx.globalAlpha = pt.alpha;
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.globalAlpha = 1;
+      if (elapsed < durationMs || particles.length > 0 || rockets.length > 0) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        cleanup();
+      }
+    }
+
+    var fadeTimer = setTimeout(function () {
+      canvas.classList.add('is-fading');
+      banner.classList.remove('is-visible');
+    }, 5100);
+
+    var removeTimer = setTimeout(function () {
+      cleanup();
+    }, 6100);
+
+    function cleanup() {
+      if (stopped) {
+        return;
+      }
+      stopped = true;
+      cancelAnimationFrame(rafId);
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+      canvas.remove();
+      banner.remove();
+      if (activeFireworksCleanup === cleanup) {
+        activeFireworksCleanup = null;
+      }
+    }
+
+    activeFireworksCleanup = cleanup;
+    rafId = requestAnimationFrame(tick);
+  }
+
+  async function handleSnowmanEvent() {
+    try {
+      var data = await chrome.storage.local.get(SNOWMAN_MISSES_KEY);
+      var raw = data && data[SNOWMAN_MISSES_KEY];
+      var misses = typeof raw === 'number' && Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : 0;
+      var triggered = core.rollSnowmanEvent(misses);
+      if (triggered) {
+        await chrome.storage.local.set({ [SNOWMAN_MISSES_KEY]: 0 });
+        launchSnowmanFireworks();
+      } else {
+        await chrome.storage.local.set({ [SNOWMAN_MISSES_KEY]: misses + 1 });
+      }
+    } catch (_err) {
+      // Ignore storage errors for optional festive effect
+    }
+  }
+
   async function triggerQuickReaction(descriptor, trigger, overrideReactionId) {
     if (!settings.enabled || !descriptor || !descriptor.postId) {
       return;
@@ -578,6 +856,9 @@
 
       if (core.shouldIncrementCounter(res)) {
         await incrementCounter(res.targetReactionId || targetReactionId);
+        if (String(res.targetReactionId || targetReactionId) === core.SNOWMAN_REACTION_ID) {
+          handleSnowmanEvent();
+        }
         setPostStatus(postId, 'success', 'Готово', 1800);
       } else if (res.action === 'already_set') {
         setPostStatus(postId, 'info', 'Уже стоит', 1800);
@@ -625,8 +906,15 @@
     var itemEl = target.closest('.PostStream-item[data-id][data-type="comment"]');
     if (itemEl) {
       lastHoveredItemEl = itemEl;
+      updateHoveredPostHighlight(itemEl);
+    } else if (!target.closest('.PostStream-item')) {
+      clearHoveredPostHighlight();
     }
   }, true);
+
+  document.addEventListener('pointerleave', function () {
+    clearHoveredPostHighlight();
+  });
 
   document.addEventListener('click', function (event) {
     if (!settings.enabled) {
@@ -808,8 +1096,12 @@
       settings = core.normalizeSettings(changes[SETTINGS_KEY].newValue);
       if (!settings.enabled) {
         openFavPostId = null;
+        clearHoveredPostHighlight();
         removeAllExtensionNodesFromRoot(document);
       } else {
+        if (!settings.highlightHoveredPost) {
+          clearHoveredPostHighlight();
+        }
         scheduleSync();
       }
     }
