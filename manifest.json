@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "EXBO Forum Quick Reaction",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Быстрая установка выбранной реакции на посты форума EXBO по кнопке или двойному щелчку.",
   "permissions": [
     "storage"
